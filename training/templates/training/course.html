@@ -1,0 +1,233 @@
+{% extends "admin/base_site.html" %}
+{% load admin_static %}
+
+{% block title %}Курс | {{ object.name }}{% endblock %}
+
+{% block extrastyle %}
+<style>
+    th.today {
+        border: 2px solid red;
+        border-bottom-width: 0px;
+        padding: 1px;
+        border-spacing: 0px;
+    }
+    th.not_today {
+        border: no;
+        padding: 1px;
+        border-spacing: 0px;
+    }
+    td.today {
+        border: 0px solid red;
+        border-left-width: 2px;
+        border-right-width: 2px;
+        border-bottom: 1px solid lightgray;
+        padding: 2px;
+        border-spacing: 0px;
+    }
+    td.not_today {
+        border-bottom: 1px solid lightgray;
+        padding: 2px;
+        border-spacing: 0px;
+        height: 100%;
+
+    }
+    table.clazz tr td {
+        border-collapse: collapse;
+        border: none;
+        font-size: 11px;
+        font-weight: 400;
+        vertical-align: center;
+        text-align: center;
+        padding: 1px;
+        border-spacing: 0px;
+    }
+    
+    
+
+    table.course tr.hover:hover {
+        background-color: #ffa;
+        height: 100%;
+    }
+
+    
+    tr.class_ok {
+        background-color: lightgreen;
+        border: 1px solid green;
+        font-size: 11px;
+        text-transform: lowercase;
+
+    }
+    tr.class_bad {
+        background-color: #FF6666;
+        border: 1px solid red;
+        font-size: 11px;
+        text-transform: lowercase;
+    }
+    tr.class_cancel {
+        background-color: lightyellow;
+        border: 1px solid yellow;
+        font-size: 11px;
+        text-transform: lowercase;
+    }
+    tr.class_no {
+        background-color: lightgray;
+        border: 1px solid gray;
+        font-size: 11px;
+        text-transform: lowercase;
+    }
+    
+    div.attendance_yes {
+        background-color: lightgreen;
+        border: 1px solid green;
+        font-size: 11px;
+        height: 100%;
+        text-align: center;
+    }
+    div.attendance_no {
+        background-color: #FF6666;
+        border: 1px solid red;
+        font-size: 11px;
+        height: 100%;
+        text-align: center;
+    }
+    div.attendance_undefined {
+        background-color: lightgray;
+        border: 1px solid gray;
+        font-size: 11px;
+        text-align: center;
+        height: 100%;
+    }
+    div.attendance_no_by_reason {
+        background-color: lightyellow;
+        border: 1px solid yellow;
+        font-size: 11px;
+        height: 100%;
+        text-align: center;
+    }
+
+    .button_yes {
+	background-color:#44c767;
+	border:1px solid #18ab29;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:11px;
+	padding:1px 2px;
+	text-decoration:none;
+    }
+    .button_yes:hover {
+            background-color:#5cbf2a;
+    }
+    .button_yes:active {
+            position:relative;
+            top:1px;
+    }
+
+
+.button_no {
+	background-color:#fa0a3a;
+	border:1px solid #ab1919;
+	display:inline-block;
+	cursor:pointer;
+	color:#000000;
+	font-family:Arial;
+	font-size:11px;
+	padding:1px 2px;
+	text-decoration:none;
+}
+.button_no:hover {
+	background-color:#ff8ab9;
+}
+.button_no:active {
+	position:relative;
+	top:1px;
+}
+
+</style>
+{% endblock %}
+
+{% block branding %}<h1>{{ object.name }}</h1>{% endblock %}
+
+{% block content %}
+<h1>Сегодня {% now "d M Y, l" %}</h1>
+
+
+<div class="results">
+<table id="result_list" class="course">
+<thead>
+<tr>
+<th scope="col"  class="">
+   <div class="text"><span>#</span></div>
+</th>
+<th scope="col"  class="">
+   <div class="text"><span>Список студентов</span></div>
+</th>
+<th scope="col"  class="">
+   <div class="text"><span>Группа</span></div>
+</th>
+{% for i in object.classes.all %}
+    {% if i.is_today %}
+    <th class="today">
+    {% else %}
+    <th class="not_today">
+    {% endif %}
+    <table class="clazz">
+    {#<tr><td>{{ i.date|date:"d M" }}</td></tr>#}
+    
+    {% if i.status == 0 %}
+    <tr class="class_ok">
+    {% elif i.status == 1 %}
+    <tr class="class_bad">
+    {% elif i.status == 2 %}
+    <tr class="class_cancel">
+    {% elif i.status == 3 %}
+    <tr class="class_no">
+    {% endif %}
+    
+    <td>{{ i.date|date:"d M" }}</td></tr>
+    {% if i.is_today %}
+    <tr><td><a href='{% url "training:attendance_all_check" object.id i.id 0%}' class="button_yes">Yes</a></td></tr>
+    <tr><td><a href='{% url "training:attendance_all_check" object.id i.id 1%}' class="button_no">No</a></td></tr>
+    {% endif %}
+    </table>
+    
+    </th>
+    
+
+{% endfor %}
+</tr>
+</thead>
+
+<tbody>
+{% for s in object.get_students %}
+<tr class="hover">
+<td>{{ forloop.counter }}</td>
+<td>{{ s.surname }} {{ s.name }}</td>
+<td>{{ s.students_group.name }}</td>
+{% for i in s.course_attendances %}
+    {% if i.clazz.is_today %}
+    <td class="today">
+    {% else %}
+    <td class="not_today">
+    {% endif %}
+
+    {% if i.status == 0 %}
+    <div class="attendance_yes">
+    {% elif i.status == 1 %}
+    <div class="attendance_no">
+    {% elif i.status == 2 %}
+    <div class="attendance_no_by_reason">
+    {% elif i.status == 3 %}
+    <div class="attendance_undefined">
+    {% endif %}
+    <a href='{% url "training:attendance_check" i.id %}' title="Изменить">X</a>
+    </div>
+</td>
+{% endfor %}
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

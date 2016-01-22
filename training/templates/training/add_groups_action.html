@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+{% load admin_static %}
+{% block content %}
+<form action="" method="post">{% csrf_token %}
+    <p>Добавление студентов в курсы:</p>
+    <ul>{{ items|unordered_list }}</ul>
+    <br />
+    <ul>
+    {{ form.as_ul }}
+    </ul>
+    <input type="hidden" name="action" value="add_groups" />
+    <input type="submit" name="apply" value="Добавить" />
+</form>
+{% endblock %}

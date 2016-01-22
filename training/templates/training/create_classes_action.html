@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+{% load admin_static %}
+{% block content %}
+<form action="" method="post">{% csrf_token %}
+    <p>Создание расписания для курсов</p>
+    <ul>{{ items|unordered_list }}</ul>
+    <br />
+    <ul>
+    {{ form.as_ul }}
+    </ul>
+    <input type="hidden" name="action" value="create_classes" />
+    <input type="submit" name="apply" value="Создать" />
+</form>
+{% endblock %}
