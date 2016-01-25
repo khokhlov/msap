@@ -5,6 +5,7 @@ from django.forms.extras.widgets import SelectDateWidget
 
 from .models import *
 from staff.models import *
+from contingent.models import *
 
 class CreateClassesForm(forms.Form):
     _selected_action = forms.CharField(widget = forms.MultipleHiddenInput)

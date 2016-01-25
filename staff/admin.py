@@ -25,8 +25,8 @@ class MyUserAdmin(UserAdmin):
 
     fieldsets = (
         (None,              {'fields': ('email', 'password',)}),
-        ('Personal data',   {'fields': ('name', 'patronymic', 'surname', 'email2')}),  
-        ('Permissions',     {'fields': ('is_student', 'is_teacher', 'is_active', 'is_staff', 'is_superuser',)}),  
+        ('Personal data',   {'fields': ('name', 'patronymic', 'surname', )}),  
+        ('Permissions',     {'fields': ('is_active', 'is_staff', 'is_superuser',)}),  
         ('Groups',          {'fields': ('groups', 'user_permissions',)}),
     )
 
@@ -37,11 +37,10 @@ class MyUserAdmin(UserAdmin):
         ),
     )
 
-    list_display = ('surname', 'name', 'patronymic', 'email',  'is_student', 'is_teacher')       
-    list_filter = ('is_active', 'students_group')    
+    list_display = ('surname', 'name', 'patronymic', 'email', 'is_student' )       
+    list_filter = ('is_active', )    
     search_fields = ('email',)       
     ordering = ('email',)
 
 
 admin.site.register(SiteUser, MyUserAdmin)
-admin.site.register(StudentsGroup)

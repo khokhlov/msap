@@ -203,8 +203,8 @@
 {% for s in object.get_students %}
 <tr class="hover">
 <td>{{ forloop.counter }}</td>
-<td>{{ s.surname }} {{ s.name }}</td>
-<td>{{ s.students_group.name }}</td>
+<td>{{ s.user.surname }} {{ s.user.name }}</td>
+<td>{{ s.group.name }}</td>
 {% for i in s.course_attendances %}
     {% if i.clazz.is_today %}
     <td class="today">

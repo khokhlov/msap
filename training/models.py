@@ -7,6 +7,7 @@ from django.db import models
 import datetime
 
 from staff.models import SiteUser
+from contingent.models import Student
 
 class CourseProgramm(models.Model):
     name = models.TextField(blank = False, verbose_name = u'Название')
@@ -17,7 +18,7 @@ class CourseProgramm(models.Model):
 class Course(models.Model):
     name     = models.TextField(blank = False, verbose_name = u'Название')
     programm = models.ForeignKey(CourseProgramm, blank = False, verbose_name = u'Программа курса')
-    students = models.ManyToManyField(SiteUser, related_name = 'courses', verbose_name = u'Студенты')
+    students = models.ManyToManyField(Student, related_name = 'courses', verbose_name = u'Студенты')
     teachers = models.ManyToManyField(SiteUser, related_name = 'courses_teacher', verbose_name = u'Учителя')
     
     def __unicode__(self):
@@ -98,7 +99,7 @@ class Attendance(models.Model):
     )
     
     clazz   = models.ForeignKey(Class, blank = False, related_name = 'attendances', verbose_name = u'Занятие')
-    student = models.ForeignKey(SiteUser, blank = False, related_name = 'attendances', verbose_name = u'Студент')
+    student = models.ForeignKey(Student, blank = False, related_name = 'attendances', verbose_name = u'Студент')
     status  = models.IntegerField(choices = ATTENDANCE_STATUS_CHOICES, default = ATTENDANCE_UNDEFINED, verbose_name = u'Статус')
     
     @staticmethod

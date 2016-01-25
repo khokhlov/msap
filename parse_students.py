@@ -12,19 +12,22 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "msap.settings")
 django.setup()
 
 from staff.models import *
+from contingent.models import *
 
 with open(sys.argv[1], 'rb') as csvfile:
-    spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
+    spamreader = csv.DictReader(csvfile, delimiter=',', quotechar='"')
     for row in spamreader:
-        fio = row[0].split(' ')
-        email = row[-2]
-        g = row[-1].strip('"').split(',')
-        if not SiteUser.has(email):
-            u = SiteUser.create(fio[1], fio[2], fio[0], True, False, email, 'xxx')
+        fio = row['Студент'].split(' ')
+        email = row['Адрес электронной почты']
+        if email == '':
+            email = row['Адрес электронной почты физтех']            
+        g = row['Группа, Год основания, Наименование'].strip('"').split(',')
+        if not Student.has_by_email(email):
+            u = Student.create(fio[1], fio[2], fio[0], email, 'xxx')
             print 'Added', u
         print g
         gr = StudentsGroup.get_or_create(g[0], g[1].replace(' ', ''))
-        u = SiteUser.get_by_email(email)
-        u.students_group = gr
+        u = Student.get_by_email(email)
+        u.group = gr
         u.save()
         print 'Update group %s -> %s' % (u, gr)
