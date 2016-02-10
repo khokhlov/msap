@@ -166,6 +166,9 @@
 <th scope="col"  class="">
    <div class="text"><span>Группа</span></div>
 </th>
+<th scope="col"  class="">
+   <div class="text"><span>E-mail</span></div>
+</th>
 {% for i in object.classes.all %}
     {% if i.is_today %}
     <th class="today">
@@ -205,6 +208,7 @@
 <td>{{ forloop.counter }}</td>
 <td>{{ s.user.surname }} {{ s.user.name }}</td>
 <td>{{ s.group.name }}</td>
+<td>{{ s.user.email }}</td>
 {% for i in s.course_attendances %}
     {% if i.clazz.is_today %}
     <td class="today">
