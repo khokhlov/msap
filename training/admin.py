@@ -70,6 +70,8 @@ class CourseAdmin(admin.ModelAdmin):
     form = CourseAdminForm
     inlines = [ClassInline]
     actions = [create_classes, add_groups]
+    view_on_site = True
+    list_display = ['name', 'get_html_url']
 
 
 admin.site.register(CourseProgramm)

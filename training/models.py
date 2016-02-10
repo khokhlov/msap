@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.core.urlresolvers import reverse
 
 import datetime
 
@@ -33,6 +34,14 @@ class Course(models.Model):
     
     def add_group(self, g):
         self.students.add(*list(g.students.all()))
+    
+    def get_absolute_url(self):
+        return reverse('training:course', args=[self.pk])
+    
+    def get_html_url(self):
+        return '<a href="%s">%s</a>' % (self.get_absolute_url(), self.name)
+    get_html_url.allow_tags = True
+    get_html_url.short_description = u'Смотреть на сайте'
   
 
 class Couple(models.Model):
