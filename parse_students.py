@@ -23,7 +23,10 @@ with open(sys.argv[1], 'rb') as csvfile:
             email = row['Адрес электронной почты физтех']            
         g = row['Группа, Год основания, Наименование'].strip('"').split(',')
         if not Student.has_by_email(email):
-            u = Student.create(fio[1], fio[2], fio[0], email, 'xxx')
+            if len(fio) > 2:
+                u = Student.create(fio[1], fio[2], fio[0], email, 'xxx')
+            else:
+                u = Student.create(fio[1], u'', fio[0], email, 'xxx')
             print 'Added', u
         print g
         gr = StudentsGroup.get_or_create(g[0], g[1].replace(' ', ''))
