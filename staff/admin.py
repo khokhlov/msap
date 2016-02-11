@@ -39,7 +39,7 @@ class MyUserAdmin(UserAdmin):
 
     list_display = ('surname', 'name', 'patronymic', 'email', 'is_student' )       
     list_filter = ('is_active', )    
-    search_fields = ('email',)       
+    search_fields = ('email', 'surname', 'name')       
     ordering = ('email',)
 
 
