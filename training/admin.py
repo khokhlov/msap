@@ -4,6 +4,8 @@ from django.contrib import admin
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django import forms
+from django.core.urlresolvers import reverse
+
 
 from .models import *
 from .forms import *
@@ -48,6 +50,18 @@ def add_groups(modeladmin, request, queryset):
     return render(request, 'training/add_groups_action.html', {'items': queryset, 'form': form, 'title': u'Добавить студентов из групп'})
 add_groups.short_description = u'Добавить студентов'
 
+def create_mailing(modeladmin, request, queryset):
+    t = u''
+    if queryset.count() > 0:
+        t = queryset.all()[0].__unicode__()
+    m = Mailing.create_mailing(t, u'', [])
+    m.author = request.user
+    m.save()
+    for c in queryset.all():
+        c.add_students_to_mailing(m)
+    return HttpResponseRedirect(reverse('admin:staff_mailing_change', args=[m.id]))
+create_mailing.short_description = u'Создать рассылку'
+
 class ClassInline(admin.TabularInline):
     model = Class
     extra = 1
@@ -69,7 +83,7 @@ class CourseAdmin(admin.ModelAdmin):
         return qs.filter(teachers = request.user)
     form = CourseAdminForm
     inlines = [ClassInline]
-    actions = [create_classes, add_groups]
+    actions = [create_classes, add_groups, create_mailing]
     view_on_site = True
     list_display = ['name', 'get_html_url']
 

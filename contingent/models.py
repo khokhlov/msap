@@ -11,6 +11,7 @@ class StudentsGroup(models.Model):
             
     name = models.TextField(blank=False, verbose_name=u'Название')
     year = models.IntegerField(blank=False, verbose_name=u'Год')
+    monitor = models.ForeignKey('contingent.Student', blank = True, null = True, related_name = 'monitor_group', verbose_name = u'Староста')
     
     def __unicode__(self):
         return '%s, %s' % (self.name, self.year)
@@ -32,6 +33,9 @@ class Student(models.Model):
 
     def __unicode__(self):
         return self.user.__unicode__()
+    
+    def is_monitor(self):
+        return self.group.monitor == self
     
     @staticmethod
     def create(name, patronymic, surname, email, password):

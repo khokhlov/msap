@@ -152,6 +152,8 @@
 {% block content %}
 <h1>Сегодня {% now "d M Y, l" %}</h1>
 
+<p>(Жирным помечен староста).<p>
+
 
 <div class="results">
 <table id="result_list" class="course">
@@ -206,8 +208,8 @@
 {% for s in object.get_students %}
 <tr class="hover">
 <td>{{ forloop.counter }}</td>
-<td>{{ s.user.surname }} {{ s.user.name }}</td>
-<td>{{ s.group.name }}</td>
+<td>{% if s.is_monitor %}<b>{{ s.user.surname }} {{ s.user.name }}</b> {% else %} {{ s.user.surname }} {{ s.user.name }} {% endif %}</td>
+<td><a href="{% url 'admin:contingent_studentsgroup_change' s.group.id %}">{{ s.group.name }}</a></td>
 <td>{{ s.user.email }}</td>
 {% for i in s.course_attendances %}
     {% if i.clazz.is_today %}

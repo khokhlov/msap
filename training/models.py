@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 
 import datetime
 
-from staff.models import SiteUser
+from staff.models import SiteUser, Mailing
 from contingent.models import Student
 
 class CourseProgramm(models.Model):
@@ -42,6 +42,10 @@ class Course(models.Model):
         return '<a href="%s">%s</a>' % (self.get_absolute_url(), self.name)
     get_html_url.allow_tags = True
     get_html_url.short_description = u'Смотреть на сайте'
+    
+    def add_students_to_mailing(self, m):
+        for s in self.students.all():
+            m.to.add(s.user)
   
 
 class Couple(models.Model):

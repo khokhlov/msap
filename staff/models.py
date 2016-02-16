@@ -6,6 +6,10 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
+from django.conf import settings
+from django.core.mail import send_mass_mail
+
+import datetime
 
 
 class SiteUserManager(BaseUserManager):
@@ -31,7 +35,7 @@ class SiteUserManager(BaseUserManager):
 
 class SiteUser(AbstractBaseUser, PermissionsMixin):
     class Meta:
-        ordering = ['surname', 'name']
+        ordering = ['surname',]
     
     email  = models.EmailField(unique=True, blank=False, verbose_name=u'Основной адрес электронной почты (логин)')
 
@@ -77,5 +81,45 @@ class SiteUser(AbstractBaseUser, PermissionsMixin):
     
     def get_attendances(self, course):
         return self.attendances.filter(clazz__course = course).all()
+    
+    def __unicode__(self):
+        return u'%s %s %s' % (self.surname, self.name, self.patronymic)
 
+class Mailing(models.Model):
+    subject = models.TextField(verbose_name = u'Тема')
+    message = models.TextField(verbose_name = u'Сообщение')
+    to = models.ManyToManyField(SiteUser, related_name = 'mailings', verbose_name = u'Кому')
+    is_delivered = models.BooleanField(default = False, verbose_name = u'Отправлено')
+    date = models.DateTimeField(auto_now_add = True, verbose_name = u'Дата создания')
+    author = models.ForeignKey(SiteUser, null = True, verbose_name = u'Отправитель')
+    date_delivery = models.DateTimeField(default = None, null = True, verbose_name = u'Дата отправки')
+    
+    def send(self):
+        msgs = self.create_messages()
+        ret = send_mass_mail(msgs, fail_silently=False)
+        if ret:
+            self.date_delivery = datetime.datetime.now()
+            self.is_delivered = True
+            self.save()
+        return ret
+    
+    @staticmethod
+    def create_mailing(subj, msg, to):
+        m = Mailing()
+        m.subject = subj
+        m.message = msg
+        m.save()
+        for i in to:
+            m.to.add(i)
+        return m
+    
+    def create_single_message(self, to):
+        return (self.subject, self.message, settings.DEFAULT_FROM_EMAIL, [to.email,])
+    
+    def create_messages(self):
+        msgs = []
+        for to in self.to.all():
+            msgs.append(self.create_single_message(to))
+        return msgs
 
+    
