@@ -8,8 +8,14 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.conf import settings
 from django.core.mail import send_mass_mail
+from django.core.urlresolvers import reverse
+from django.core.mail import get_connection, EmailMultiAlternatives
+
+import md5
 
 import datetime
+
+from html2text import html2text
 
 
 class SiteUserManager(BaseUserManager):
@@ -93,10 +99,11 @@ class Mailing(models.Model):
     date = models.DateTimeField(auto_now_add = True, verbose_name = u'Дата создания')
     author = models.ForeignKey(SiteUser, null = True, verbose_name = u'Отправитель')
     date_delivery = models.DateTimeField(default = None, null = True, verbose_name = u'Дата отправки')
+    with_notification = models.BooleanField(default = False, verbose_name = u'С уведомлениями')
     
     def send(self):
         msgs = self.create_messages()
-        ret = send_mass_mail(msgs, fail_silently=False)
+        ret = self.send_mass_html_mail(msgs, fail_silently=False)
         if ret:
             self.date_delivery = datetime.datetime.now()
             self.is_delivered = True
@@ -114,12 +121,68 @@ class Mailing(models.Model):
         return m
     
     def create_single_message(self, to):
-        return (self.subject, self.message, settings.DEFAULT_FROM_EMAIL, [to.email,])
+        if self.with_notification:
+            MailingStatus.get_or_create(self, to)
+        m = self.process_message(self.message, to)
+        return (self.subject, html2text(m), m, settings.DEFAULT_FROM_EMAIL, [to.email,])
     
     def create_messages(self):
         msgs = []
         for to in self.to.all():
             msgs.append(self.create_single_message(to))
         return msgs
-
     
+    def process_message(self, m, to):
+        m = m.replace('%NAME%', to.name)
+        m = m.replace('%SURNAME%', to.surname)
+        m = m.replace('%PATRONYMIC%', to.patronymic)
+        if self.with_notification:
+            s = MailingStatus.get_or_create(self, to)
+            m = m.replace('%NOTIFY_URL%', s.get_url())
+        return m
+    
+    def send_mass_html_mail(self, datatuple, fail_silently=False, user=None, password=None, connection=None):
+        """
+        Given a datatuple of (subject, text_content, html_content, from_email,
+        recipient_list), sends each message to each recipient list. Returns the
+        number of emails sent.
+
+        If from_email is None, the DEFAULT_FROM_EMAIL setting is used.
+        If auth_user and auth_password are set, they're used to log in.
+        If auth_user is None, the EMAIL_HOST_USER setting is used.
+        If auth_password is None, the EMAIL_HOST_PASSWORD setting is used.
+
+        """
+        connection = connection or get_connection(
+            username=user, password=password, fail_silently=fail_silently)
+        messages = []
+        for subject, text, html, from_email, recipient in datatuple:
+            message = EmailMultiAlternatives(subject, text, from_email, recipient)
+            message.attach_alternative(html, 'text/html')
+            messages.append(message)
+        return connection.send_messages(messages)
+
+class MailingStatus(models.Model):
+    mailing = models.ForeignKey(Mailing, verbose_name = u'Рассылка', related_name = 'statuses')
+    recipient = models.ForeignKey(SiteUser, verbose_name = u'Получатель', related_name = 'mailing_statuses')
+    received = models.BooleanField(default = False, verbose_name = u'Получено')
+    slug = models.SlugField(verbose_name = u'Код')
+    
+    @staticmethod
+    def get_or_create(mailing, user):
+        q = MailingStatus.objects.filter(recipient = user).filter(mailing = mailing)
+        if q.count() > 0:
+            return q[0]
+        ms = MailingStatus()
+        ms.recipient = user
+        ms.mailing = mailing
+        ms.save()
+        return ms
+
+    def get_url(self):
+        return reverse('staff:mailing_status_read', args=[self.slug])
+    
+    def save(self, *args, **kwargs):
+        super(MailingStatus, self).save(*args, **kwargs)
+        self.slug = md5.md5('%s' % self.id).hexdigest()
+        super(MailingStatus, self).save(*args, **kwargs)

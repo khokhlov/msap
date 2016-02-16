@@ -111,8 +111,8 @@ class MailingAdmin(ActionInChangeFormMixin, admin.ModelAdmin):
         fields = self.readonly_fields
         if obj:
             if obj.is_delivered:
-                fields += ('subject', 'message',)
-            fields += ('author', 'date', 'is_delivered', 'date_delivery')
+                fields += ('subject', 'message', 'with_notification')
+            fields += ('author', 'date', 'is_delivered', 'date_delivery', )
         
         return fields
     
@@ -132,5 +132,23 @@ class MailingAdmin(ActionInChangeFormMixin, admin.ModelAdmin):
 
 
 
+class MailingStatusAdmin(admin.ModelAdmin):
+    list_display = ('subj', 'date', 'recipient', 'received', 'get_url')
+    list_filter = ('received', )
+    
+    def get_readonly_fields(self, request, obj=None):
+        fields = self.readonly_fields
+        fields += ('mailing', 'recipient', 'received', 'slug')
+        return fields
+    
+    def subj(self, obj):
+        return obj.mailing.subject
+    subj.short_description = u'Тема'
+    
+    def date(self, obj):
+        return obj.mailing.date_delivery
+    date.short_description = u'Дата рассылки'
+
 admin.site.register(SiteUser, MyUserAdmin)
 admin.site.register(Mailing, MailingAdmin)
+admin.site.register(MailingStatus, MailingStatusAdmin)

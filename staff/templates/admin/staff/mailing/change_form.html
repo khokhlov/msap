@@ -8,8 +8,22 @@
 
 {% block object-tools %}
     {{ block.super }}
+    {% if original.is_delivered %}
+        {% if original.with_notification %}
+        <h3>Статус прочтения:</h3>
+        <fieldset class="module aligned ">
+            <div class="form-row">
+            {% for s in original.statuses.all %}
+            <div><label>{{ s.recipient }}</label><p>{% if s.received %}<img src="/static/admin/img/icon-yes.svg" alt="True" />{% else %}<img src="/static/admin/img/icon-no.svg" alt="True" />{% endif %}</p></div>
+            {% endfor %}
+            </div>
+        </fieldset>
+        {% endif %}
+    {% else %}
+        <h3>Сохраните рассылку и затем отправьте.</h3>
+    {% endif %}
     <div id="changelist">
-    <p>Сохраните рассылку и затем отправьте.</p>
+    <h3>Данные рассылки:</h3>
     <form action="{% url opts|admin_urlname:'changelist' %}" method="POST">{% csrf_token %}
     {% if action_form and original.message != '' and original.subject != '' and not original.is_delivered %}
         <input type='hidden' name='action' value='send_mailing' />
