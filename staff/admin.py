@@ -53,6 +53,7 @@ class MailingChangeForm(forms.ModelForm):
         model = Mailing
         widgets = {
             'subject': forms.TextInput(),
+            'notification_redirect': forms.TextInput(),
         }
         exclude = ('to', 'author', 'is_delivered', 'date_delivery')
 
@@ -111,7 +112,7 @@ class MailingAdmin(ActionInChangeFormMixin, admin.ModelAdmin):
         fields = self.readonly_fields
         if obj:
             if obj.is_delivered:
-                fields += ('subject', 'message', 'with_notification')
+                fields += ('subject', 'message', 'with_notification', 'notification_redirect')
             fields += ('author', 'date', 'is_delivered', 'date_delivery', )
         
         return fields
@@ -133,12 +134,12 @@ class MailingAdmin(ActionInChangeFormMixin, admin.ModelAdmin):
 
 
 class MailingStatusAdmin(admin.ModelAdmin):
-    list_display = ('subj', 'date', 'recipient', 'received', 'get_url')
+    list_display = ('subj', 'date', 'recipient', 'received', 'get_url', 'redirect_url')
     list_filter = ('received', )
     
     def get_readonly_fields(self, request, obj=None):
         fields = self.readonly_fields
-        fields += ('mailing', 'recipient', 'received', 'slug')
+        fields += ('mailing', 'recipient', 'received', 'slug', 'redirect_url')
         return fields
     
     def subj(self, obj):

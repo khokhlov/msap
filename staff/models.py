@@ -100,6 +100,7 @@ class Mailing(models.Model):
     author = models.ForeignKey(SiteUser, null = True, verbose_name = u'Отправитель')
     date_delivery = models.DateTimeField(default = None, null = True, verbose_name = u'Дата отправки')
     with_notification = models.BooleanField(default = False, verbose_name = u'С уведомлениями')
+    notification_redirect = models.TextField(blank = True, null = True, verbose_name = u'Ссылка для уведомления')
     
     def send(self):
         msgs = self.create_messages()
@@ -167,6 +168,7 @@ class MailingStatus(models.Model):
     recipient = models.ForeignKey(SiteUser, verbose_name = u'Получатель', related_name = 'mailing_statuses')
     received = models.BooleanField(default = False, verbose_name = u'Получено')
     slug = models.SlugField(verbose_name = u'Код')
+    redirect_url = models.TextField(blank = True, null = True, default = '', verbose_name = u'Ссылка для редиректа')
     
     @staticmethod
     def get_or_create(mailing, user):
@@ -176,6 +178,8 @@ class MailingStatus(models.Model):
         ms = MailingStatus()
         ms.recipient = user
         ms.mailing = mailing
+        if mailing.notification_redirect is not None and mailing.notification_redirect != '':
+            ms.redirect_url = mailing.notification_redirect
         ms.save()
         return ms
 
