@@ -12,11 +12,9 @@
         {% if original.with_notification %}
         <h3>Статус прочтения:</h3>
         <fieldset class="module aligned ">
-            <div class="form-row">
             {% for s in original.statuses.all %}
-            <div><label>{{ s.recipient }}</label><p>{% if s.received %}<img src="/static/admin/img/icon-yes.svg" alt="True" />{% else %}<img src="/static/admin/img/icon-no.svg" alt="True" />{% endif %}</p></div>
+            <div class="form-row"><div><label>{{ s.recipient }}</label><p>{% if s.received %}<img src="/static/admin/img/icon-yes.svg" alt="True" />{% else %}<img src="/static/admin/img/icon-no.svg" alt="True" />{% endif %}</p></div></div>
             {% endfor %}
-            </div>
         </fieldset>
         {% endif %}
     {% else %}
