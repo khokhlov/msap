@@ -9,6 +9,7 @@ from django.core.urlresolvers import reverse
 
 from .models import *
 from .forms import *
+from contingent.models import Student
 
 
 def create_classes(modeladmin, request, queryset):
@@ -66,6 +67,14 @@ class ClassInline(admin.TabularInline):
     model = Class
     extra = 1
 
+class StudentInline(admin.TabularInline):
+    model = Course.students.through
+    extra = 1
+    verbose_name = u'студент'
+    verbose_name_plural = u'Добавить сутдентов'
+
+
+
 class CourseAdminForm(forms.ModelForm):
     class Meta:
         model = Course
@@ -82,7 +91,7 @@ class CourseAdmin(admin.ModelAdmin):
             return qs
         return qs.filter(teachers = request.user)
     form = CourseAdminForm
-    inlines = [ClassInline]
+    inlines = [ClassInline, StudentInline]
     actions = [create_classes, add_groups, create_mailing]
     view_on_site = True
     list_display = ['name', 'get_html_url']

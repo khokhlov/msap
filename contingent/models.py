@@ -32,7 +32,7 @@ class Student(models.Model):
     group = models.ForeignKey(StudentsGroup, blank = True, null = True, related_name = 'students', verbose_name = u'Группа')
 
     def __unicode__(self):
-        return self.user.__unicode__()
+        return '%s %s' % (self.user.__unicode__(), self.group)
     
     def is_monitor(self):
         return self.group.monitor == self
