@@ -169,6 +169,7 @@ class MailingStatus(models.Model):
     received = models.BooleanField(default = False, verbose_name = u'Получено')
     slug = models.SlugField(verbose_name = u'Код')
     redirect_url = models.TextField(blank = True, null = True, default = '', verbose_name = u'Ссылка для редиректа')
+    modified = models.DateTimeField(blank = True, null = True, auto_now = True, verbose_name = u'Время модификации')
     
     @staticmethod
     def get_or_create(mailing, user):

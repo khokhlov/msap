@@ -22,15 +22,15 @@ with open(sys.argv[1], 'rb') as csvfile:
         if email == '':
             email = row['Адрес электронной почты физтех']            
         g = row['Группа, Год основания, Наименование'].strip('"').split(',')
-        if not Student.has_by_email(email):
-            if len(fio) > 2:
-                u = Student.create(fio[1], fio[2], fio[0], email, 'xxx')
-            else:
-                u = Student.create(fio[1], u'', fio[0], email, 'xxx')
+        if len(fio) < 3:
+            fio.append(u'')
+        if not Student.has_by_fio(fio[0], fio[1], fio[2]):
+            print 'Adding', fio[1], fio[2], fio[0], email
+            u = Student.create(fio[1], fio[2], fio[0], email, 'xxx')
             print 'Added', u
         print g
         gr = StudentsGroup.get_or_create(g[0], g[1].replace(' ', ''))
-        u = Student.get_by_email(email)
+        u = Student.get_by_fio(fio[0], fio[1], fio[2])
         u.group = gr
         u.save()
         print 'Update group %s -> %s' % (u, gr)

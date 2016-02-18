@@ -134,12 +134,12 @@ class MailingAdmin(ActionInChangeFormMixin, admin.ModelAdmin):
 
 
 class MailingStatusAdmin(admin.ModelAdmin):
-    list_display = ('subj', 'date', 'recipient', 'received', 'get_url', 'redirect_url')
+    list_display = ('subj', 'date', 'recipient', 'received', 'modified', 'get_url', 'redirect_url')
     list_filter = ('received', )
     
     def get_readonly_fields(self, request, obj=None):
         fields = self.readonly_fields
-        fields += ('mailing', 'recipient', 'received', 'slug', 'redirect_url')
+        fields += ('mailing', 'recipient', 'received', 'modified', 'slug', 'redirect_url')
         return fields
     
     def subj(self, obj):

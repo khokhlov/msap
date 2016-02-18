@@ -28,6 +28,9 @@ class StudentsGroup(models.Model):
         return g
 
 class Student(models.Model):
+    class Meta:
+        ordering = ['user__surname',]
+    
     user = models.OneToOneField(SiteUser, related_name='student')
     group = models.ForeignKey(StudentsGroup, blank = True, null = True, related_name = 'students', verbose_name = u'Группа')
 
@@ -45,6 +48,7 @@ class Student(models.Model):
         else:
             u = SiteUser.create(name, patronymic, surname, email, password)
         s = Student()
+        print u, email
         s.user = u
         s.save()
         return s
@@ -52,6 +56,14 @@ class Student(models.Model):
     @staticmethod
     def has_by_email(email):
         return Student.objects.filter(user__email = email).count() > 0
+    
+    @staticmethod
+    def has_by_fio(surname, n1, n2):
+        return Student.objects.filter(user__name__iexact = n1).filter(user__surname__iexact = surname).filter(user__patronymic__iexact = n2).count() > 0
+    
+    @staticmethod
+    def get_by_fio(surname, n1, n2):
+        return Student.objects.filter(user__name__iexact = n1).filter(user__surname__iexact = surname).filter(user__patronymic__iexact = n2)[0]
 
     @staticmethod
     def get_by_email(email):
