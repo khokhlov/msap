@@ -246,7 +246,7 @@
     <td><a href="{{ i.get_url }}">{{ i.get_score }}</a></td>
 {% endfor %}
 <th>&nbsp;</th>
-<td>{{ s.course_score.score_final }}</td>
+<td><a href="{% url 'admin:training_coursescore_change' s.course_score.id %}">{{ s.course_score.score_final }}</a></td>
 {% if object.is_auto_check %}
 <td>{{ s.course_score.score_auto }}/{{ s.course_score.score_min }}/{{ s.course_score.score_max }}</td>
 {% endif %}

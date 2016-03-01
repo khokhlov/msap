@@ -115,11 +115,13 @@ class CourseTaskSolutionAdmin(admin.ModelAdmin):
 def update_course_scores(modeladmin, request, queryset):
     for i in queryset.all():
         i.update()
-update_course_scores.short_description = u'Обновит авто значения'
+update_course_scores.short_description = u'Обновить авто значения'
 
 class CourseScoreAdmin(admin.ModelAdmin):
     list_display = ['course', 'student']
     actions = [update_course_scores, ]
+    def get_readonly_fields(self, request, obj=None):
+        return self.readonly_fields + ('score_min', 'score_max', 'score_auto', 'student', 'course')
 
 admin.site.register(CourseProgramm)
 admin.site.register(Couple)
