@@ -191,13 +191,15 @@ class Attendance(models.Model):
 
 class CourseTask(models.Model):
     class Meta:
-        ordering = ['deadline_start', ]
+        ordering = ['num', ]
 
     short_name = models.CharField(max_length = 256, null = True, blank = True, verbose_name = u'Короткое название')
     task = models.ForeignKey(BaseTask, verbose_name = u'Описание')
     course = models.ForeignKey(Course, null = True, verbose_name = u'Курс', related_name = 'coursetasks')
     deadline_start = models.DateTimeField(blank = True, null = True, verbose_name = u'Начало сдачи')
     deadline_end = models.DateTimeField(blank = True, null = True, verbose_name = u'Окончание сдачи')
+    
+    num = models.IntegerField(default = 0, verbose_name = u'Номер задачи в курсе (для сортировки и авто отметки)')
     
     score_min = models.DecimalField(max_digits = 5, decimal_places = 2, default = Decimal('0.00'), verbose_name = u'Минимальная отметка за задачу')
     score_max = models.DecimalField(max_digits = 5, decimal_places = 2, default = Decimal('1.00'), verbose_name = u'Максимальная отметка за задачу')
@@ -206,6 +208,8 @@ class CourseTask(models.Model):
         return u'%s' % self.short_name
 
 class CourseTaskSolution(models.Model):
+    class Meta:
+        ordering = ['task__num', ]
     task = models.ForeignKey(CourseTask, verbose_name = u'Задача')
     student = models.ForeignKey(Student, verbose_name = u'Студент')
     solutions = models.ForeignKey(BaseSolution, null = True, blank = True, verbose_name = u'Решение')
