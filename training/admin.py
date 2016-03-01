@@ -81,7 +81,7 @@ class CourseAdminForm(forms.ModelForm):
     class Meta:
         model = Course
         #fields = '__all__'
-        fields = ['name', 'programm']
+        fields = ['name', 'programm', 'auto_check_flag', 'auto_check_code']
         widgets = {
             'name': forms.TextInput(),
         }
@@ -99,6 +99,7 @@ class CourseAdmin(admin.ModelAdmin):
     list_display = ['name', 'get_html_url']
 
 
+
 class CourseTaskSolutionAdmin(admin.ModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         fields = self.readonly_fields
@@ -111,9 +112,19 @@ class CourseTaskSolutionAdmin(admin.ModelAdmin):
         (u'Инфо',           {'fields': ('task', 'student', )}),  
     )
 
+def update_course_scores(modeladmin, request, queryset):
+    for i in queryset.all():
+        i.update()
+update_course_scores.short_description = u'Обновит авто значения'
+
+class CourseScoreAdmin(admin.ModelAdmin):
+    list_display = ['course', 'student']
+    actions = [update_course_scores, ]
+
 admin.site.register(CourseProgramm)
 admin.site.register(Couple)
 admin.site.register(CourseTaskSolution, CourseTaskSolutionAdmin)
+admin.site.register(CourseScore, CourseScoreAdmin)
 admin.site.register(Attendance)
 admin.site.register(Course, CourseAdmin)
 

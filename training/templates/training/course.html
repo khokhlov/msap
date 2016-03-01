@@ -204,6 +204,11 @@
 {% for i in object.coursetasks.all %}
     <th>{{ i.short_name }}</th>
 {% endfor %}
+<th>&nbsp;</th>
+<th>Итог</th>
+{% if object.is_auto_check %}
+<th>Авто curr/min/max</th>
+{% endif %}
 
 </tr>
 </thead>
@@ -240,6 +245,11 @@
 {% for i in s.course_solutions %}
     <td><a href="{{ i.get_url }}">{{ i.get_score }}</a></td>
 {% endfor %}
+<th>&nbsp;</th>
+<td>{{ s.course_score.score_final }}</td>
+{% if object.is_auto_check %}
+<td>{{ s.course_score.score_auto }}/{{ s.course_score.score_min }}/{{ s.course_score.score_max }}</td>
+{% endif %}
 
 </tr>
 {% endfor %}

@@ -22,6 +22,8 @@ class CourseProgramm(models.Model):
 class Course(models.Model):
     name     = models.TextField(blank = False, verbose_name = u'Название')
     programm = models.ForeignKey(CourseProgramm, blank = False, verbose_name = u'Программа курса')
+    auto_check_code = models.TextField(blank = True, null = True, verbose_name = u'Код для автоматической проверки')
+    auto_check_flag = models.BooleanField(default = False, verbose_name = u'Автоматическая проверка')
     students = models.ManyToManyField(Student, related_name = 'courses', verbose_name = u'Студенты')
     teachers = models.ManyToManyField(Teacher, related_name = 'courses_teacher', verbose_name = u'Учителя')
     
@@ -31,10 +33,18 @@ class Course(models.Model):
     def get_students(self):
         s = []
         for i in self.students.all():
-            i.course_attendances = Attendance.get_or_create_cource(i, self)
-            i.course_solutions = CourseTaskSolution.get_or_create_solution_course(i, self)
+            i = self.fill_student(i)
             s.append(i)
         return s
+    
+    def fill_student(self, s):
+        s.course_attendances = Attendance.get_or_create_cource(s, self)
+        s.course_solutions = CourseTaskSolution.get_or_create_solution_course(s, self)
+        s.course_score = CourseScore.get_or_create(s, self)
+        return s
+    
+    def is_auto_check(self):
+        return self.auto_check_flag
     
     def add_group(self, g):
         self.students.add(*list(g.students.all()))
@@ -50,7 +60,35 @@ class Course(models.Model):
     def add_students_to_mailing(self, m):
         for s in self.students.all():
             m.to.add(s.user)
-  
+    
+class CourseScore(models.Model):
+    course  = models.ForeignKey(Course, verbose_name = u'Курс')
+    student = models.ForeignKey(Student, verbose_name = u'Студент')
+    
+    score_min   = models.DecimalField(max_digits = 5, decimal_places = 2, default = Decimal('0.00'), verbose_name = u'Минимум')
+    score_max   = models.DecimalField(max_digits = 5, decimal_places = 2, default = Decimal('0.00'), verbose_name = u'Максимум')
+    score_auto  = models.DecimalField(max_digits = 5, decimal_places = 2, default = Decimal('0.00'), verbose_name = u'Авто-оценка')
+    score_final = models.DecimalField(max_digits = 5, decimal_places = 2, default = Decimal('0.00'), verbose_name = u'Финальная отметка')
+    
+    @staticmethod
+    def get_or_create(student, course):
+        q = CourseScore.objects.filter(course = course).filter(student = student)
+        if q.count() > 0:
+            return q[0]
+        s = CourseScore()
+        s.student = student
+        s.course = course
+        s.save()
+        return s
+    
+    def update(self):
+        if self.course.is_auto_check():
+            code = self.course.auto_check_code
+            #TODO: implement
+            self.score_max = Decimal("10")
+            self.score_min = Decimal("0")
+            self.save()
+            
 
 class Couple(models.Model):
     name       = models.TextField(blank = False, verbose_name = u'Название')
