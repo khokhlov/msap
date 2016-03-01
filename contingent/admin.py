@@ -23,3 +23,4 @@ class StudentsGroupAdmin(admin.ModelAdmin):
 
 admin.site.register(StudentsGroup, StudentsGroupAdmin)
 admin.site.register(Student)
+admin.site.register(Teacher)

@@ -6,7 +6,6 @@ from django.http import HttpResponseRedirect
 from django import forms
 from django.core.urlresolvers import reverse
 
-
 from .models import *
 from .forms import *
 from contingent.models import Student
@@ -67,13 +66,16 @@ class ClassInline(admin.TabularInline):
     model = Class
     extra = 1
 
+
 class StudentInline(admin.TabularInline):
     model = Course.students.through
     extra = 1
     verbose_name = u'студент'
     verbose_name_plural = u'Добавить сутдентов'
 
-
+class CourseTaskInline(admin.TabularInline):
+    model = CourseTask
+    extra = 1
 
 class CourseAdminForm(forms.ModelForm):
     class Meta:
@@ -91,14 +93,27 @@ class CourseAdmin(admin.ModelAdmin):
             return qs
         return qs.filter(teachers = request.user)
     form = CourseAdminForm
-    inlines = [ClassInline, StudentInline]
+    inlines = [CourseTaskInline, ClassInline, StudentInline]
     actions = [create_classes, add_groups, create_mailing]
     view_on_site = True
     list_display = ['name', 'get_html_url']
 
 
+class CourseTaskSolutionAdmin(admin.ModelAdmin):
+    def get_readonly_fields(self, request, obj=None):
+        fields = self.readonly_fields
+        fields += ('task', 'student')
+        return fields
+    
+    fieldsets = (
+        (None,              {'fields': ('solutions', )}),
+        (u'Ручная отметка', {'fields': ('hand_flag', 'hand_score', )}),  
+        (u'Инфо',           {'fields': ('task', 'student', )}),  
+    )
+
 admin.site.register(CourseProgramm)
 admin.site.register(Couple)
+admin.site.register(CourseTaskSolution, CourseTaskSolutionAdmin)
 admin.site.register(Attendance)
 admin.site.register(Course, CourseAdmin)
 

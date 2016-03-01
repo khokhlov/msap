@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'staff',
     'training',
     'contingent',
+    'tasks',
 ]
 
 MIDDLEWARE_CLASSES = [

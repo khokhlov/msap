@@ -6,12 +6,15 @@ from django.db import models
 from django.core.urlresolvers import reverse
 
 import datetime
+from decimal import Decimal
 
 from staff.models import SiteUser, Mailing
-from contingent.models import Student
+from contingent.models import Student, Teacher
+from tasks.models import BaseTask, BaseSolution
 
 class CourseProgramm(models.Model):
     name = models.TextField(blank = False, verbose_name = u'Название')
+    creatos = models.ManyToManyField(Teacher, blank = True, verbose_name = u'Составители', related_name = 'course_programms')
     
     def __unicode__(self):
         return u'%s' % self.name
@@ -20,7 +23,7 @@ class Course(models.Model):
     name     = models.TextField(blank = False, verbose_name = u'Название')
     programm = models.ForeignKey(CourseProgramm, blank = False, verbose_name = u'Программа курса')
     students = models.ManyToManyField(Student, related_name = 'courses', verbose_name = u'Студенты')
-    teachers = models.ManyToManyField(SiteUser, related_name = 'courses_teacher', verbose_name = u'Учителя')
+    teachers = models.ManyToManyField(Teacher, related_name = 'courses_teacher', verbose_name = u'Учителя')
     
     def __unicode__(self):
         return u'%s' % self.name
@@ -29,6 +32,7 @@ class Course(models.Model):
         s = []
         for i in self.students.all():
             i.course_attendances = Attendance.get_or_create_cource(i, self)
+            i.course_solutions = CourseTaskSolution.get_or_create_solution_course(i, self)
             s.append(i)
         return s
     
@@ -146,3 +150,64 @@ class Attendance(models.Model):
         else:
             self.status = Attendance.ATTENDANCE_YES
         self.save()
+
+class CourseTask(models.Model):
+    class Meta:
+        ordering = ['deadline_start', ]
+
+    short_name = models.CharField(max_length = 256, null = True, blank = True, verbose_name = u'Короткое название')
+    task = models.ForeignKey(BaseTask, verbose_name = u'Описание')
+    course = models.ForeignKey(Course, null = True, verbose_name = u'Курс', related_name = 'coursetasks')
+    deadline_start = models.DateTimeField(blank = True, null = True, verbose_name = u'Начало сдачи')
+    deadline_end = models.DateTimeField(blank = True, null = True, verbose_name = u'Окончание сдачи')
+    
+    score_min = models.DecimalField(max_digits = 5, decimal_places = 2, default = Decimal('0.00'), verbose_name = u'Минимальная отметка за задачу')
+    score_max = models.DecimalField(max_digits = 5, decimal_places = 2, default = Decimal('1.00'), verbose_name = u'Максимальная отметка за задачу')
+    
+    def __unicode__(self):
+        return u'%s' % self.short_name
+
+class CourseTaskSolution(models.Model):
+    task = models.ForeignKey(CourseTask, verbose_name = u'Задача')
+    student = models.ForeignKey(Student, verbose_name = u'Студент')
+    solutions = models.ForeignKey(BaseSolution, null = True, blank = True, verbose_name = u'Решение')
+    
+    hand_flag = models.BooleanField(default = False, verbose_name = u'Выставить отметку вручную')
+    hand_score = models.DecimalField(max_digits = 5, decimal_places = 2, default = Decimal('0.00'), verbose_name = u'Ручная отметка')
+    
+    def __unicode__(self):
+        return u'%s, %s, %s' % (self.task, self.task.course, self.student)
+    
+    def get_score(self):
+        if self.hand_flag:
+            return self.hand_score
+        if self.solutions:
+            return 10000
+        else:
+            return self.task.score_min * self.task.task.score_min
+    
+    @staticmethod
+    def get_or_create_solution(student, task):
+        q = CourseTaskSolution.objects.filter(student = student).filter(task = task)
+        if q.count() > 0:
+            return q[0]
+        s = CourseTaskSolution()
+        s.student = student
+        s.task = task
+        s.solutions = None
+        s.save()
+        return s
+    
+    @staticmethod
+    def get_or_create_solution_course(student, course):
+        q = CourseTaskSolution.objects.filter(student = student).filter(task__course = course)
+        if q.count() != course.coursetasks.count():
+            for c in course.coursetasks.all():
+                CourseTaskSolution.get_or_create_solution(student, c)
+        q = CourseTaskSolution.objects.filter(student = student).filter(task__course = course)
+        return q.all()
+    
+    def get_url(self):
+        return reverse('admin:training_coursetasksolution_change', args=[self.pk])
+    
+    

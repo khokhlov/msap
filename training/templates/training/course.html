@@ -198,9 +198,13 @@
     </table>
     
     </th>
-    
-
 {% endfor %}
+
+<th>&nbsp;</th>
+{% for i in object.coursetasks.all %}
+    <th>{{ i.short_name }}</th>
+{% endfor %}
+
 </tr>
 </thead>
 
@@ -231,6 +235,12 @@
     </div>
 </td>
 {% endfor %}
+<td>&nbsp;</td>
+
+{% for i in s.course_solutions %}
+    <td><a href="{{ i.get_url }}">{{ i.get_score }}</a></td>
+{% endfor %}
+
 </tr>
 {% endfor %}
 </tbody>
