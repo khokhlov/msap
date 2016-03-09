@@ -74,6 +74,8 @@ class Student(AbstractStaff):
         return '%s %s' % (self.user.__unicode__(), self.group)
     
     def is_monitor(self):
+        if self.group is None:
+            return False
         return self.group.monitor == self
     
     @staticmethod

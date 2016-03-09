@@ -6,8 +6,9 @@ from .models import *
 class StudentsGroupAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(StudentsGroupAdminForm, self).__init__(*args, **kwargs)
-        if 'initial' in kwargs:
-             self.fields['monitor'].queryset = initial.studentsgroup.students
+        print kwargs
+        if 'instance' in kwargs:
+             self.fields['monitor'].queryset = kwargs['instance'].students
 
     class Meta:
         model = StudentsGroup

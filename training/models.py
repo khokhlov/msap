@@ -226,7 +226,7 @@ class CourseTaskSolution(models.Model):
         if self.solutions:
             return 10000
         else:
-            return self.task.score_min * self.task.task.score_min
+            return self.task.score_min
     
     @staticmethod
     def get_or_create_solution(student, task):
