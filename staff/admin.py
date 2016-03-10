@@ -112,7 +112,7 @@ class MailingAdmin(ActionInChangeFormMixin, admin.ModelAdmin):
         fields = self.readonly_fields
         if obj:
             if obj.is_delivered:
-                fields += ('subject', 'message', 'with_notification', 'notification_redirect')
+                fields += ('subject', 'message', 'message_txt', 'with_notification', 'notification_redirect')
             fields += ('author', 'date', 'is_delivered', 'date_delivery', )
         
         return fields

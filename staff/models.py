@@ -10,6 +10,7 @@ from django.conf import settings
 from django.core.mail import send_mass_mail
 from django.core.urlresolvers import reverse
 from django.core.mail import get_connection, EmailMultiAlternatives
+from django.template import Context, Template
 
 import md5
 
@@ -92,8 +93,9 @@ class SiteUser(AbstractBaseUser, PermissionsMixin):
         return u'%s %s %s' % (self.surname, self.name, self.patronymic)
 
 class Mailing(models.Model):
-    subject = models.TextField(verbose_name = u'Тема')
-    message = models.TextField(verbose_name = u'Сообщение')
+    subject     = models.TextField(verbose_name = u'Тема')
+    message     = models.TextField(verbose_name = u'Сообщение html')
+    message_txt = models.TextField(blank = True, null = True, verbose_name = u'Сообщение txt')
     to = models.ManyToManyField(SiteUser, related_name = 'mailings', verbose_name = u'Кому')
     is_delivered = models.BooleanField(default = False, verbose_name = u'Отправлено')
     date = models.DateTimeField(auto_now_add = True, verbose_name = u'Дата создания')
@@ -124,14 +126,33 @@ class Mailing(models.Model):
     def create_single_message(self, to):
         if self.with_notification:
             MailingStatus.get_or_create(self, to)
-        m = self.process_message(self.message, to)
-        return (self.subject, html2text(m), m, settings.DEFAULT_FROM_EMAIL, [to.email,])
+        #m = self.process_message(self.message, to)
+        ctx = self.get_context(to)
+        ts = Template(self.subject)
+        tmh = Template(self.message)
+        tmt = Template(self.message_txt)
+        txt = ''
+        if self.message_txt is not None and self.message_txt != '':
+            txt = tmt.render(ctx)
+        else:
+            txt = html2text(tmh.render(ctx))
+        return (ts.render(ctx), txt, tmh.render(ctx), settings.DEFAULT_FROM_EMAIL, [to.email,])
     
     def create_messages(self):
         msgs = []
         for to in self.to.all():
             msgs.append(self.create_single_message(to))
         return msgs
+    
+    def get_context(self, to):
+        ctx = {
+            'user': to,
+            'mailing': self,
+            'mailing_status': None,
+            }
+        if self.with_notification:
+            ctx['mailing_status'] = MailingStatus.get_or_create(self, to)
+        return Context(ctx)
     
     def process_message(self, m, to):
         m = m.replace('%NAME%', to.name)
