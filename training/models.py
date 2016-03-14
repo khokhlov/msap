@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 
 import datetime
 from decimal import Decimal
+import md5
 
 from staff.models import SiteUser, Mailing
 from contingent.models import Student, Teacher
@@ -252,4 +253,18 @@ class CourseTaskSolution(models.Model):
     def get_url(self):
         return reverse('admin:training_coursetasksolution_change', args=[self.pk])
     
+
+def cts_upload(instance, filename):
+    h = md5.md5('%s_%s' % (instance.cts.student.pk, filename)).hexdigest()
+    return 'course_task_solutions_files/%s/%s/%s_%s' % (instance.cts.task.pk, instance.cts.student.pk, h, filename)
+
+class CourseTaskSolutionFile(models.Model):
+    class Meta:
+        ordering = ['-created']
+
+    cts = models.ForeignKey(CourseTaskSolution, verbose_name = u'Решение задачи')
+    name = models.CharField(max_length = 1024, verbose_name = u'Название')
+    attachment_file = models.FileField(upload_to = cts_upload, verbose_name = u'Файл')
+    created = models.DateTimeField(auto_now_add = True, verbose_name = u'Время создания')
+    modified = models.DateTimeField(auto_now=True, verbose_name = u'Время модификации')
     

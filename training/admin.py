@@ -100,6 +100,11 @@ class CourseAdmin(admin.ModelAdmin):
 
 
 
+class CourseTaskSolutionFileInline(admin.TabularInline):
+    model = CourseTaskSolutionFile
+    extra = 1
+
+
 class CourseTaskSolutionAdmin(admin.ModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         fields = self.readonly_fields
@@ -111,6 +116,8 @@ class CourseTaskSolutionAdmin(admin.ModelAdmin):
         (u'Ручная отметка', {'fields': ('hand_flag', 'hand_score', )}),  
         (u'Инфо',           {'fields': ('task', 'student', )}),  
     )
+    
+    inlines = (CourseTaskSolutionFileInline, )
 
 def update_course_scores(modeladmin, request, queryset):
     for i in queryset.all():
