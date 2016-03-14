@@ -209,6 +209,11 @@ class CourseTask(models.Model):
         return u'%s' % self.short_name
 
 class CourseTaskSolution(models.Model):
+    
+    SOLUTION_BAD     = 0
+    SOLUTION_GOOD    = 1
+    SOLUTION_PARTIAL = 2
+    
     class Meta:
         ordering = ['task__num', ]
     task = models.ForeignKey(CourseTask, verbose_name = u'Задача')
@@ -228,6 +233,17 @@ class CourseTaskSolution(models.Model):
             return 10000
         else:
             return self.task.score_min
+    
+    def get_status(self):
+        if self.get_score() == self.task.score_min:
+            return CourseTaskSolution.SOLUTION_BAD
+        if self.get_score() == self.task.score_max:
+            return CourseTaskSolution.SOLUTION_GOOD
+        return CourseTaskSolution.SOLUTION_PARTIAL
+    
+    def get_status_class_css(self):
+        classes = ['solution_bad', 'solution_good', 'solution_partial']
+        return classes[self.get_status()]
     
     @staticmethod
     def get_or_create_solution(student, task):

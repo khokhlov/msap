@@ -144,6 +144,32 @@
 	top:1px;
 }
 
+a.solution_bad {
+    background-color: #ffb3b3;
+    padding: 2px 5px;
+    text-align: center;	
+    text-decoration: none;
+    display: inline-block;
+}
+
+a.solution_good {
+    background-color: #99ff99;
+    padding: 2px 5px;
+    text-align: center;	
+    text-decoration: none;
+    display: inline-block;
+}
+
+a.solution_partial {
+    background-color: #ffff99;
+    padding: 2px 5px;
+    text-align: center;	
+    text-decoration: none;
+    display: inline-block;
+}
+
+
+
 </style>
 {% endblock %}
 
@@ -243,7 +269,7 @@
 <td>&nbsp;</td>
 
 {% for i in s.course_solutions %}
-    <td><a href="{{ i.get_url }}">{{ i.get_score }}</a></td>
+    <td><a href="{{ i.get_url }}" class="{{ i.get_status_class_css }}">{{ i.get_score }}</a></td>
 {% endfor %}
 <th>&nbsp;</th>
 <td><a href="{% url 'admin:training_coursescore_change' s.course_score.id %}">{{ s.course_score.score_final }}</a></td>
