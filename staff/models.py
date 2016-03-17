@@ -13,10 +13,10 @@ from django.core.mail import get_connection, EmailMultiAlternatives
 from django.template import Context, Template
 
 import md5
-
 import datetime
 
 from html2text import html2text
+from reversion import revisions as reversion
 
 
 class SiteUserManager(BaseUserManager):
@@ -40,6 +40,7 @@ class SiteUserManager(BaseUserManager):
         u.save(using=self._db)
         return u
 
+@reversion.register()
 class SiteUser(AbstractBaseUser, PermissionsMixin):
     class Meta:
         ordering = ['surname',]

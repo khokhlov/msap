@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'training',
     'contingent',
     'tasks',
+    'django_mailbox',
+    'reversion',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -132,6 +134,8 @@ STATIC_URL = '/static/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+DJANGO_MAILBOX_STORE_ORIGINAL_MESSAGE = True
 
 try:
     from local_settings import *
