@@ -4,15 +4,19 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.core.urlresolvers import reverse
+from django.db import transaction
 
 import datetime
 from decimal import Decimal
 import md5
 
+from reversion import revisions as reversion
+
 from staff.models import SiteUser, Mailing
 from contingent.models import Student, Teacher
 from tasks.models import BaseTask, BaseSolution
 
+@reversion.register()
 class CourseProgramm(models.Model):
     name = models.TextField(blank = False, verbose_name = u'Название')
     creatos = models.ManyToManyField(Teacher, blank = True, verbose_name = u'Составители', related_name = 'course_programms')
@@ -20,6 +24,7 @@ class CourseProgramm(models.Model):
     def __unicode__(self):
         return u'%s' % self.name
 
+@reversion.register()
 class Course(models.Model):
     name     = models.TextField(blank = False, verbose_name = u'Название')
     programm = models.ForeignKey(CourseProgramm, blank = False, verbose_name = u'Программа курса')
@@ -61,7 +66,8 @@ class Course(models.Model):
     def add_students_to_mailing(self, m):
         for s in self.students.all():
             m.to.add(s.user)
-    
+            
+@reversion.register()    
 class CourseScore(models.Model):
     course  = models.ForeignKey(Course, verbose_name = u'Курс')
     student = models.ForeignKey(Student, verbose_name = u'Студент')
@@ -82,6 +88,8 @@ class CourseScore(models.Model):
         s.save()
         return s
     
+    @transaction.atomic()
+    @reversion.create_revision()
     def update(self):
         if self.course.is_auto_check():
             code = self.course.auto_check_code
@@ -100,6 +108,7 @@ class Couple(models.Model):
     def __unicode__(self):
         return u'%s' % self.name
 
+@reversion.register()
 class Class(models.Model):
     CLASS_OK     = 0
     CLASS_BAD    = 1
@@ -137,7 +146,8 @@ class Class(models.Model):
     
     def is_today(self):
         return datetime.date.today() == self.date
-    
+
+@reversion.register()    
 class Attendance(models.Model):
     class Meta:
         ordering = ['clazz__date', 'clazz__couple__time_from']
@@ -208,6 +218,7 @@ class CourseTask(models.Model):
     def __unicode__(self):
         return u'%s' % self.short_name
 
+@reversion.register()
 class CourseTaskSolution(models.Model):
     
     SOLUTION_BAD     = 0

@@ -27,6 +27,11 @@ from django.contrib import admin
 from django.contrib.admin.sites import NotRegistered
 
 
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -136,6 +141,7 @@ def html_diff(value1, value2, cleanup=SEMANTIC):
     """
     value1 = force_text(value1)
     value2 = force_text(value2)
+    print value1, value2
     if google_diff_match_patch:
         # Generate the diff with google-diff-match-patch
         diff = dmp.diff_main(value1, value2)

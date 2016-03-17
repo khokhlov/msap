@@ -156,4 +156,4 @@ admin.site.register(SiteUser, MyUserAdmin)
 admin.site.register(Mailing, MailingAdmin)
 admin.site.register(MailingStatus, MailingStatusAdmin)
 
-#patch_admin(SiteUser)
+patch_admin(SiteUser)

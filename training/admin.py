@@ -6,6 +6,8 @@ from django.http import HttpResponseRedirect
 from django import forms
 from django.core.urlresolvers import reverse
 
+from reversion_compare.helpers import patch_admin
+
 from .models import *
 from .forms import *
 from contingent.models import Student
@@ -137,3 +139,8 @@ admin.site.register(CourseScore, CourseScoreAdmin)
 admin.site.register(Attendance)
 admin.site.register(Course, CourseAdmin)
 
+patch_admin(CourseProgramm)
+patch_admin(CourseTaskSolution)
+patch_admin(Course)
+patch_admin(Attendance)
+patch_admin(CourseScore)
