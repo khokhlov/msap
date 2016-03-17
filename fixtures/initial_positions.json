@@ -1,0 +1,58 @@
+[
+{
+    "model": "contingent.positiontype",
+    "pk": 1,
+    "fields": {
+        "name": "научный сотрудник",
+        "short_name": "н.с."
+    }
+},
+{
+    "model": "contingent.positiontype",
+    "pk": 2,
+    "fields": {
+        "name": "старший научный сотрудник",
+        "short_name": "с.н.с."
+    }
+},
+{
+    "model": "contingent.positiontype",
+    "pk": 3,
+    "fields": {
+        "name": "ведущий научный сотрудник",
+        "short_name": "в.н.с."
+    }
+},
+{
+    "model": "contingent.positiontype",
+    "pk": 4,
+    "fields": {
+        "name": "главный научный сотрудник",
+        "short_name": "г.н.с."
+    }
+},
+{
+    "model": "contingent.positiontype",
+    "pk": 5,
+    "fields": {
+        "name": "младший научный сотрудник",
+        "short_name": "м.н.с."
+    }
+},
+{
+    "model": "contingent.positiontype",
+    "pk": 6,
+    "fields": {
+        "name": "инженер",
+        "short_name": "инженер"
+    }
+},
+{
+    "model": "contingent.positiontype",
+    "pk": 7,
+    "fields": {
+        "name": "техник",
+        "short_name": "техник"
+    }
+}
+]

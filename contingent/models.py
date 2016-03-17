@@ -3,6 +3,10 @@ from __future__ import unicode_literals
 
 from django.db import models
 
+from reversion import revisions as reversion
+
+from decimal import Decimal
+
 from staff.models import *
 
 class StudentsGroup(models.Model):
@@ -100,3 +104,44 @@ class Student(AbstractStaff):
 
 class Teacher(AbstractStaff):
     pass
+
+@reversion.register()
+class Subdivision(models.Model):
+    name = models.TextField(verbose_name = u'Название')
+    
+    def __unicode__(self):
+        return self.name
+
+class PositionType(models.Model):
+    name = models.TextField(verbose_name = u'Название')
+    short_name = models.CharField(max_length=256, null = True, blank = True, verbose_name = u'Кратное название')
+    
+    def __unicode__(self):
+        return self.name
+
+class EmploymentType(models.Model):
+    name = models.TextField(verbose_name = u'Название')
+    short_name = models.CharField(max_length=256, null = True, blank = True, verbose_name = u'Кратное название')
+    
+    def __unicode__(self):
+        return self.name
+
+class AbstractTimedObject(models.Model):
+    class Meta:
+        abstract = True
+    
+    active    = models.BooleanField(default = True, verbose_name = u'Активный')
+    date_from = models.DateTimeField(verbose_name = u'Дата от')
+    date_to   = models.DateTimeField(null = True, blank = True, verbose_name = u'Дата до')
+    
+@reversion.register()
+class Position(AbstractTimedObject):
+    user = models.ForeignKey(SiteUser, related_name='positions', verbose_name = u'Сотрудник')
+    subdivision = models.ForeignKey(Subdivision, related_name = 'employees', verbose_name = u'Подразделение')
+    employment_type = models.ForeignKey(EmploymentType, verbose_name = u'Вид занятости')
+    position_type = models.ForeignKey(PositionType, verbose_name = u'Должность')
+    rate = models.DecimalField(max_digits = 3, decimal_places = 2, default = Decimal('0.00'), verbose_name = u'Ставка')
+    
+    def __unicode__(self):
+        return '%s (%s)' % (self.user, self.position_type.short_name)
+    

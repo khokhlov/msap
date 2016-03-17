@@ -87,6 +87,10 @@ class SiteUser(AbstractBaseUser, PermissionsMixin):
     def get_by_email(email):
         return SiteUser.objects.filter(email = email)[0]
     
+    @staticmethod
+    def has_by_fio(surname, name, patronymic):
+        return SiteUser.objects.filter(name__iexact = name).filter(surname__iexact = surname).filter(patronymic__iexact = patronymic).count() > 0
+    
     def get_attendances(self, course):
         return self.attendances.filter(clazz__course = course).all()
     

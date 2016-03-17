@@ -1,0 +1,26 @@
+[
+{
+    "model": "contingent.employmenttype",
+    "pk": 1,
+    "fields": {
+        "name": "штатный",
+        "short_name": "штат."
+    }
+},
+{
+    "model": "contingent.employmenttype",
+    "pk": 2,
+    "fields": {
+        "name": "внутренний совместитеть",
+        "short_name": "совм."
+    }
+},
+{
+    "model": "contingent.employmenttype",
+    "pk": 3,
+    "fields": {
+        "name": "внешний совместитеть",
+        "short_name": "совм."
+    }
+}
+]
