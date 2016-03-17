@@ -1,6 +1,9 @@
 from django.contrib import admin
 from django import forms
 
+from reversion_compare.helpers import patch_admin
+from reversion_compare.admin import CompareVersionAdmin
+
 from .models import *
 
 class StudentsGroupAdminForm(forms.ModelForm):
@@ -32,3 +35,5 @@ admin.site.register(Subdivision)
 admin.site.register(PositionType)
 admin.site.register(EmploymentType)
 admin.site.register(Position, PositionAdmin)
+
+patch_admin(Subdivision)

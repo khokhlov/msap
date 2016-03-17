@@ -108,6 +108,7 @@ class Teacher(AbstractStaff):
 @reversion.register()
 class Subdivision(models.Model):
     name = models.TextField(verbose_name = u'Название')
+    chief = models.ForeignKey('contingent.Position', null = True, blank = True, related_name = u'chief_subdivisions', verbose_name = u'Заведующий')
     
     def __unicode__(self):
         return self.name

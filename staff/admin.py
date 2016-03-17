@@ -5,6 +5,8 @@ from django import forms
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.http import HttpResponseRedirect
+from reversion_compare.helpers import patch_admin
+
 
 from staff.models import *
 
@@ -153,3 +155,5 @@ class MailingStatusAdmin(admin.ModelAdmin):
 admin.site.register(SiteUser, MyUserAdmin)
 admin.site.register(Mailing, MailingAdmin)
 admin.site.register(MailingStatus, MailingStatusAdmin)
+
+#patch_admin(SiteUser)

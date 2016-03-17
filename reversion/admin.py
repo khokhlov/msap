@@ -8,7 +8,10 @@ from django.db import models, transaction, connection
 from django.conf.urls import url
 from django.contrib import admin
 from django.contrib.admin import options
-from django.contrib.admin.utils import unquote, quote
+try:
+    from django.contrib.admin.utils import unquote, quote
+except ImportError:  # Django < 1.7  pragma: no cover
+    from django.contrib.admin.util import unquote, quote
 try:
     from django.contrib.contenttypes.admin import GenericInlineModelAdmin
     from django.contrib.contenttypes.fields import GenericRelation
@@ -133,13 +136,7 @@ class VersionAdmin(admin.ModelAdmin):
                         fk_name = field.name
                         break
             if fk_name and not inline_model._meta.get_field(fk_name).rel.is_hidden():
-                field = inline_model._meta.get_field(fk_name)
-                try:
-                    # >=django1.9
-                    remote_field = field.remote_field
-                except AttributeError:
-                    remote_field = field.related
-                accessor = remote_field.get_accessor_name()
+                accessor = inline_model._meta.get_field(fk_name).related.get_accessor_name()
                 follow_field = accessor
         return inline_model, follow_field, fk_name
 
@@ -209,21 +206,17 @@ class VersionAdmin(admin.ModelAdmin):
             raise PermissionDenied
         # Render the recover view.
         version = get_object_or_404(Version, pk=version_id)
-        context = {
+        return self.revisionform_view(request, version, self.recover_form_template or self._get_template_list("recover_form.html"), {
             "title": _("Recover %(name)s") % {"name": version.object_repr},
-        }
-        context.update(extra_context or {})
-        return self.revisionform_view(request, version, self.recover_form_template or self._get_template_list("recover_form.html"), context)
+        })
 
     def revision_view(self, request, object_id, version_id, extra_context=None):
         """Displays the contents of the given revision."""
         object_id = unquote(object_id) # Underscores in primary key get quoted to "_5F"
         version = get_object_or_404(Version, pk=version_id, object_id=object_id)
-        context = {
+        return self.revisionform_view(request, version, self.revision_form_template or self._get_template_list("revision_form.html"), {
             "title": _("Revert %(name)s") % {"name": version.object_repr},
-        }
-        context.update(extra_context or {})
-        return self.revisionform_view(request, version, self.revision_form_template or self._get_template_list("revision_form.html"), context)
+        })
 
     def changelist_view(self, request, extra_context=None):
         """Renders the change view."""

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'tasks',
     'django_mailbox',
     'reversion',
+    'reversion_compare'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -136,6 +137,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 DJANGO_MAILBOX_STORE_ORIGINAL_MESSAGE = True
+
+ADD_REVERSION_ADMIN=True
 
 try:
     from local_settings import *
