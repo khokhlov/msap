@@ -103,7 +103,56 @@ class Student(AbstractStaff):
         return AbstractStaff.has_by_email(Student, email)
 
 class Teacher(AbstractStaff):
-    pass
+    @staticmethod
+    def create(name, patronymic, surname, email, password):
+        return AbstractStaff.create(Teacher, name, patronymic, surname, email, password)
+    
+    @staticmethod
+    def has_by_email(email):
+        return AbstractStaff.has_by_email(Teacher, email)
+    
+    @staticmethod
+    def has_by_fio(surname, n1, n2):
+        return AbstractStaff.has_by_fio(Teacher, surname, n1, n2)
+    
+    @staticmethod
+    def get_by_fio(surname, n1, n2):
+        return AbstractStaff.get_by_fio(Teacher, surname, n1, n2)
+
+    @staticmethod
+    def get_by_email(email):
+        return AbstractStaff.has_by_email(Teacher, email)
+
+class ScientificManagement(models.Model):
+    student    = models.ForeignKey(Student, related_name = 'supervisors', verbose_name = u'Студент')
+    supervisor = models.ForeignKey(Teacher, related_name = 'scientific_students', verbose_name = u'Научный руководитель')
+    active_flag = models.BooleanField(default = False, verbose_name = u'Активная')
+    created = models.DateTimeField(auto_now_add = True, verbose_name = u'Время создания')
+    modified = models.DateTimeField(auto_now=True, verbose_name = u'Время модификации')
+    
+    def __unicode__(self):
+        return u'%s -> %s' % (self.supervisor, self.student)
+    
+    @staticmethod
+    def has_sc_management(student, teacher):
+        return ScientificManagement.objects.filter(active_flag = True).filter(student = student).filter(supervisor = teacher).count() > 0
+    
+    @staticmethod
+    def get_sc_management(student, teacher):
+        return ScientificManagement.objects.filter(active_flag = True).filter(student = student).filter(supervisor = teacher)[0]
+    
+    @staticmethod
+    def create_sc_management(student, teacher):
+        sm = ScientificManagement()
+        sm.student = student
+        sm.supervisor = teacher
+        sm.active_flag = True
+        sm.save()
+        return sm
+    
+    @staticmethod
+    def unactive_all_sm(student):
+        student.supervisors.filter(active_flag = True).update(active_flag = False)
 
 @reversion.register()
 class Subdivision(models.Model):
@@ -145,4 +194,3 @@ class Position(AbstractTimedObject):
     
     def __unicode__(self):
         return '%s (%s)' % (self.user, self.position_type.short_name)
-    

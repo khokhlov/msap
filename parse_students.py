@@ -20,7 +20,7 @@ with open(sys.argv[1], 'rb') as csvfile:
         fio = row['Студент'].split(' ')
         email = row['Адрес электронной почты']
         if email == '':
-            email = row['Адрес электронной почты физтех']            
+            email = row['Адрес электронной почты физтех']
         g = row['Группа, Год основания, Наименование'].strip('"').split(',')
         if len(fio) < 3:
             fio.append(u'')
@@ -34,3 +34,18 @@ with open(sys.argv[1], 'rb') as csvfile:
         u.group = gr
         u.save()
         print 'Update group %s -> %s' % (u, gr)
+        
+        supervisor = row['Научный руководитель'].strip()
+        if supervisor and supervisor != '':
+            supervisor = supervisor.strip().split(' ')
+            if len(supervisor) == 3:
+                if not Teacher.has_by_fio(supervisor[0], supervisor[1], supervisor[2]):
+                    print 'Cant find teacher:', supervisor[0]
+                else:
+                    t = Teacher.get_by_fio(supervisor[0], supervisor[1], supervisor[2])
+                    if not ScientificManagement.has_sc_management(u, t):
+                        ScientificManagement.unactive_all_sm(u)
+                        sm = ScientificManagement.create_sc_management(u, t)
+                        print sm
+            
+

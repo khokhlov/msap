@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'training',
     'contingent',
     'tasks',
+    'gendoc',
     'django_mailbox',
     'reversion',
     'reversion_compare'
