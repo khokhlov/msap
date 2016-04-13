@@ -235,7 +235,7 @@ class CourseTaskSolution(models.Model):
     hand_score = models.DecimalField(max_digits = 5, decimal_places = 2, default = Decimal('0.00'), verbose_name = u'Ручная отметка')
     
     def __unicode__(self):
-        return u'%s, %s, %s' % (self.task, self.task.course, self.student)
+        return u'%s (%s), %s, %s' % (self.task, self.task.task.name, self.task.course, self.student)
     
     def get_score(self):
         if self.hand_flag:
