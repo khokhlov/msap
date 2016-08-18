@@ -1,10 +1,29 @@
+#coding: utf-8
+
 from django.contrib import admin
 from django import forms
+from django.http import HttpResponseRedirect
 
 from reversion_compare.helpers import patch_admin
 from reversion_compare.admin import CompareVersionAdmin
 
+
 from .models import *
+
+
+def create_mailing(modeladmin, request, queryset):
+    t = u''
+    if queryset.count() > 0:
+        t = queryset.all()[0].__unicode__()
+    m = Mailing.create_mailing(t, u'', [])
+    m.author = request.user
+    m.save()
+    for c in queryset.all():
+        for s in c.students.all():
+            m.to.add(s.user)
+    return HttpResponseRedirect(reverse('admin:staff_mailing_change', args=[m.id]))
+create_mailing.short_description = u'Создать рассылку'
+
 
 class StudentsGroupAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -23,6 +42,8 @@ class StudentsGroupAdminForm(forms.ModelForm):
 
 class StudentsGroupAdmin(admin.ModelAdmin):
     form = StudentsGroupAdminForm
+    
+    actions = [create_mailing, ]
 
 class PositionAdmin(admin.ModelAdmin):
     list_display = ['user', 'employment_type', 'position_type', 'date_from', 'date_to', 'rate', 'subdivision', 'active']
