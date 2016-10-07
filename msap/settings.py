@@ -44,7 +44,9 @@ INSTALLED_APPS = [
     'gendoc',
     'django_mailbox',
     'reversion',
-    'reversion_compare'
+    'reversion_compare',
+    'rest_framework',
+    'report_builder',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -73,6 +75,9 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.core.context_processors.i18n',
                 'django.template.context_processors.media',
+                'django.core.context_processors.static',
+                'django.core.context_processors.media',
+                 
             ],
         },
     },
@@ -140,6 +145,7 @@ MEDIA_URL = '/media/'
 DJANGO_MAILBOX_STORE_ORIGINAL_MESSAGE = True
 
 ADD_REVERSION_ADMIN=True
+REPORT_BUILDER_GLOBAL_EXPORT = True
 
 try:
     from local_settings import *

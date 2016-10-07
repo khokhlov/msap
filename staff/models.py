@@ -91,6 +91,10 @@ class SiteUser(AbstractBaseUser, PermissionsMixin):
     def has_by_fio(surname, name, patronymic):
         return SiteUser.objects.filter(name__iexact = name).filter(surname__iexact = surname).filter(patronymic__iexact = patronymic).count() > 0
     
+    @staticmethod
+    def get_by_fio(surname, name, patronymic):
+        return SiteUser.objects.filter(name__iexact = name).filter(surname__iexact = surname).filter(patronymic__iexact = patronymic)[0]
+    
     def get_attendances(self, course):
         return self.attendances.filter(clazz__course = course).all()
     
@@ -109,8 +113,15 @@ class Mailing(models.Model):
     with_notification = models.BooleanField(default = False, verbose_name = u'С уведомлениями')
     notification_redirect = models.TextField(blank = True, null = True, verbose_name = u'Ссылка для уведомления')
     
+    test_flag = models.BooleanField(default = False, verbose_name = u'Тестовая рассылка')
+    test_email = models.CharField(max_length = 2014, blank = True, null = True, verbose_name = u'Тестовый e-mail')
+    
     def send(self):
-        msgs = self.create_messages()
+        msgs = None
+        if self.test_flag:
+            msgs = self.create_messages(self.test_email)
+        else:
+            msgs = self.create_messages()
         ret = self.send_mass_html_mail(msgs, fail_silently=False)
         if ret:
             self.date_delivery = datetime.datetime.now()
@@ -128,7 +139,7 @@ class Mailing(models.Model):
             m.to.add(i)
         return m
     
-    def create_single_message(self, to):
+    def create_single_message(self, to, custom_to = None):
         if self.with_notification:
             MailingStatus.get_or_create(self, to)
         #m = self.process_message(self.message, to)
@@ -141,12 +152,15 @@ class Mailing(models.Model):
             txt = tmt.render(ctx)
         else:
             txt = html2text(tmh.render(ctx))
-        return (ts.render(ctx), txt, tmh.render(ctx), settings.DEFAULT_FROM_EMAIL, [to.email,])
+        email = to.email
+        if custom_to:
+            email = custom_to
+        return (ts.render(ctx), txt, tmh.render(ctx), settings.DEFAULT_FROM_EMAIL, [email,])
     
-    def create_messages(self):
+    def create_messages(self, custom_to = None):
         msgs = []
         for to in self.to.all():
-            msgs.append(self.create_single_message(to))
+            msgs.append(self.create_single_message(to, custom_to))
         return msgs
     
     def get_context(self, to):

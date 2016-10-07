@@ -24,6 +24,44 @@ def create_mailing(modeladmin, request, queryset):
     return HttpResponseRedirect(reverse('admin:staff_mailing_change', args=[m.id]))
 create_mailing.short_description = u'Создать рассылку'
 
+def create_mailing_contingent(modeladmin, request, queryset):
+    t = u''
+    if queryset.count() > 0:
+        t = queryset.all()[0].__unicode__()
+    m = Mailing.create_mailing(t, u'', [])
+    m.author = request.user
+    m.save()
+    for c in queryset.all():
+        m.to.add(c.user)
+    return HttpResponseRedirect(reverse('admin:staff_mailing_change', args=[m.id]))
+create_mailing_contingent.short_description = u'Создать рассылку'
+
+def create_mailing_sm_t(modeladmin, request, queryset):
+    t = u''
+    if queryset.count() > 0:
+        t = queryset.all()[0].__unicode__()
+    m = Mailing.create_mailing(t, u'', [])
+    m.author = request.user
+    m.save()
+    for c in queryset.all():
+        m.to.add(c.supervisor.user)
+    return HttpResponseRedirect(reverse('admin:staff_mailing_change', args=[m.id]))
+create_mailing_sm_t.short_description = u'Создать рассылку по научрукам'
+
+def create_mailing_sm_s(modeladmin, request, queryset):
+    t = u''
+    if queryset.count() > 0:
+        t = queryset.all()[0].__unicode__()
+    m = Mailing.create_mailing(t, u'', [])
+    m.author = request.user
+    m.save()
+    for c in queryset.all():
+        m.to.add(c.student.user)
+    return HttpResponseRedirect(reverse('admin:staff_mailing_change', args=[m.id]))
+create_mailing_sm_s.short_description = u'Создать рассылку по студентам'
+
+
+
 
 class StudentsGroupAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -53,10 +91,15 @@ class ScientificManagementAdmin(admin.ModelAdmin):
     list_display = ['supervisor', 'student', 'active_flag', 'created', 'modified', ]
     list_filter = ('active_flag',)
     
+    actions = [create_mailing_sm_t, create_mailing_sm_s, ]
+
+class TeacherAdmin(admin.ModelAdmin):
+    actions = [create_mailing_contingent, ]
+    
 
 admin.site.register(StudentsGroup, StudentsGroupAdmin)
 admin.site.register(Student)
-admin.site.register(Teacher)
+admin.site.register(Teacher, TeacherAdmin)
 admin.site.register(Subdivision)
 admin.site.register(PositionType)
 admin.site.register(EmploymentType)

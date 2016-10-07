@@ -23,6 +23,8 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^training/', include('training.urls')),
     url(r'^staff/', include('staff.urls')),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^report_builder/', include('report_builder.urls')),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

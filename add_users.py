@@ -27,6 +27,9 @@ with open(sys.argv[1], 'rb') as f:
         if SiteUser.has_by_fio(s[0], s[1], s[2]):
             print 'Skipping "%s" -- already exist' % row.strip()
         else:
+            if SiteUser.has(s[3]):
+                print 'Skipping "%s" -- BAG' % row.strip(), s[3]
+                continue
             with transaction.atomic(), reversion.create_revision():
                 print u'Addind', row.strip()
                 u = SiteUser.create(s[1], s[2], s[0], s[3], 'xxx')
