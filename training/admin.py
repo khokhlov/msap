@@ -105,6 +105,8 @@ class CourseAdmin(admin.ModelAdmin):
 class CourseTaskSolutionFileInline(admin.TabularInline):
     model = CourseTaskSolutionFile
     extra = 1
+    fields = ['name', 'attachment_file', 'created']
+    readonly_fields = ['created',]
 
 
 class CourseTaskSolutionAdmin(admin.ModelAdmin):
