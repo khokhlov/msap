@@ -252,6 +252,12 @@ class CourseTaskSolution(models.Model):
             return CourseTaskSolution.SOLUTION_GOOD
         return CourseTaskSolution.SOLUTION_PARTIAL
     
+    def is_solution_good(self):
+        return self.get_status() == CourseTaskSolution.SOLUTION_GOOD
+    
+    def is_solution_bad(self):
+        return self.get_status() == CourseTaskSolution.SOLUTION_BAD
+    
     def get_status_class_css(self):
         classes = ['solution_bad', 'solution_good', 'solution_partial']
         return classes[self.get_status()]

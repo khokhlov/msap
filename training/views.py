@@ -9,6 +9,8 @@ from django.db import transaction
 
 from reversion import revisions as reversion
 
+from decimal import Decimal
+
 from .models import *
 
 
@@ -34,4 +36,14 @@ class AttendanceCheck(View):
             reversion.set_user(request.user)
             reversion.set_comment("Rotating by %s" % request.user)
         return HttpResponseRedirect(reverse('training:course', args=[a.clazz.course.id]))
-    
+
+class CourseTaskSolutionHandSet(View):
+    def get(self, request, solution_id, val):
+        a = get_object_or_404(CourseTaskSolution,  pk=solution_id)
+        with transaction.atomic(), reversion.create_revision():
+            a.hand_flag = True
+            a.hand_score = Decimal(val)
+            a.save()
+            reversion.set_user(request.user)
+            reversion.set_comment("Setting max score to task %s by user %s" % (a, request.user))
+        return HttpResponseRedirect(reverse('training:course', args=[a.task.course.id]))

@@ -244,7 +244,7 @@ a.solution_partial {
 <tr class="hover">
 <td>{{ forloop.counter }}</td>
 <td>{% if s.is_monitor %}<b>{{ s.user.surname }} {{ s.user.name }}</b> {% else %} {{ s.user.surname }} {{ s.user.name }} {% endif %}</td>
-<td><a href="{% url 'admin:contingent_studentsgroup_change' s.group.id %}">{{ s.group.name }}</a></td>
+<td>{% if s.group %}<a href="{% url 'admin:contingent_studentsgroup_change' s.group.id %}">{{ s.group.name }}</a>{% endif %}</td>
 <td>{{ s.user.email }}</td>
 {% for i in s.course_attendances %}
     {% if i.clazz.is_today %}
@@ -269,7 +269,8 @@ a.solution_partial {
 <td>&nbsp;</td>
 
 {% for i in s.course_solutions %}
-    <td><a href="{{ i.get_url }}" class="{{ i.get_status_class_css }}">{{ i.get_score }}</a></td>
+    <td><a href="{{ i.get_url }}" class="{{ i.get_status_class_css }}" title="Изменить решение">{{ i.get_score }}</a>
+    {% if i.is_solution_bad %}<a href="{% url "training:course_task_solution_hand_set" i.id i.task.score_max %}" title="Выставить вручную максимум">+</a>{% endif %}</td>
 {% endfor %}
 <th>&nbsp;</th>
 <td><a href="{% url 'admin:training_coursescore_change' s.course_score.id %}">{{ s.course_score.score_final }}</a></td>
