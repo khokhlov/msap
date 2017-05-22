@@ -75,6 +75,13 @@ class StudentInline(admin.TabularInline):
     verbose_name = u'студент'
     verbose_name_plural = u'Добавить сутдентов'
 
+class TeacherInline(admin.TabularInline):
+    model = Course.teachers.through
+    extra = 1
+    verbose_name = u'преподователь'
+    verbose_name_plural = u'Добавить преподователя'
+
+
 class CourseTaskInline(admin.TabularInline):
     model = CourseTask
     extra = 1
@@ -95,7 +102,7 @@ class CourseAdmin(admin.ModelAdmin):
             return qs
         return qs.filter(teachers = request.user)
     form = CourseAdminForm
-    inlines = [CourseTaskInline, ClassInline, StudentInline]
+    inlines = [CourseTaskInline, ClassInline, StudentInline, TeacherInline]
     actions = [create_classes, add_groups, create_mailing]
     view_on_site = True
     list_display = ['name', 'get_html_url']

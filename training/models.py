@@ -66,6 +66,12 @@ class Course(models.Model):
     def add_students_to_mailing(self, m):
         for s in self.students.all():
             m.to.add(s.user)
+    
+    def is_student(self, user):
+        return self.students.filter(user = user).count() > 0
+    
+    def is_teacher(self, user):
+        return self.teachers.filter(user = user).count() > 0
             
 @reversion.register()    
 class CourseScore(models.Model):

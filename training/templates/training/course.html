@@ -178,8 +178,9 @@ a.solution_partial {
 {% block content %}
 <h1>Сегодня {% now "d M Y, l" %}</h1>
 
+{% if is_teacher %}
 <p>(Жирным помечен староста).<p>
-
+{% endif %}
 
 <div class="results">
 <table id="result_list" class="course">
@@ -194,9 +195,14 @@ a.solution_partial {
 <th scope="col"  class="">
    <div class="text"><span>Группа</span></div>
 </th>
+
+{# Почту видит только учитель. #}
+{% if is_teacher %}
 <th scope="col"  class="">
    <div class="text"><span>E-mail</span></div>
 </th>
+{% endif %}
+
 {% for i in object.classes.all %}
     {% if i.is_today %}
     <th class="today">
@@ -245,7 +251,7 @@ a.solution_partial {
 <td>{{ forloop.counter }}</td>
 <td>{% if s.is_monitor %}<b>{{ s.user.surname }} {{ s.user.name }}</b> {% else %} {{ s.user.surname }} {{ s.user.name }} {% endif %}</td>
 <td>{% if s.group %}<a href="{% url 'admin:contingent_studentsgroup_change' s.group.id %}">{{ s.group.name }}</a>{% endif %}</td>
-<td>{{ s.user.email }}</td>
+{% if is_teacher %}<td>{{ s.user.email }}</td>{% endif %}
 {% for i in s.course_attendances %}
     {% if i.clazz.is_today %}
     <td class="today">
@@ -262,7 +268,7 @@ a.solution_partial {
     {% elif i.status == 3 %}
     <div class="attendance_undefined">
     {% endif %}
-    <a href='{% url "training:attendance_check" i.id %}' title="Изменить">X</a>
+    {% if is_teacher %}<a href='{% url "training:attendance_check" i.id %}' title="Изменить">X</a>{% endif %}
     </div>
 </td>
 {% endfor %}
@@ -270,10 +276,16 @@ a.solution_partial {
 
 {% for i in s.course_solutions %}
     <td><a href="{{ i.get_url }}" class="{{ i.get_status_class_css }}" title="Изменить решение">{{ i.get_score }}</a>
-    {% if i.is_solution_bad %}<a href="{% url "training:course_task_solution_hand_set" i.id i.task.score_max %}" title="Выставить вручную максимум">+</a>{% endif %}</td>
+    {% if i.is_solution_bad and is_teacher %}<a href="{% url "training:course_task_solution_hand_set" i.id i.task.score_max %}" title="Выставить вручную максимум">+</a>{% endif %}</td>
 {% endfor %}
 <th>&nbsp;</th>
-<td><a href="{% url 'admin:training_coursescore_change' s.course_score.id %}">{{ s.course_score.score_final }}</a></td>
+<td>
+{% if is_teacher %}
+<a href="{% url 'admin:training_coursescore_change' s.course_score.id %}">{{ s.course_score.score_final }}</a>
+{% else %}
+{{ s.course_score.score_final }}
+{% endif %}
+</td>
 {% if object.is_auto_check %}
 <td>{{ s.course_score.score_auto }}/{{ s.course_score.score_min }}/{{ s.course_score.score_max }}</td>
 {% endif %}
