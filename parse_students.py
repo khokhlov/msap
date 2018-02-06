@@ -24,13 +24,17 @@ with open(sys.argv[1], 'rb') as csvfile:
         g = row['Группа, Год основания, Наименование'].strip('"').split(',')
         if len(fio) < 3:
             fio.append(u'')
-        if not Student.has_by_fio(fio[0], fio[1], fio[2]):
+        u = None
+        if Student.has_by_email(email):
+            u = Student.get_by_email(email)
+        if u is None and not Student.has_by_fio(fio[0], fio[1], fio[2]):
             print 'Adding', fio[1], fio[2], fio[0], email
             u = Student.create(fio[1], fio[2], fio[0], email, 'xxx')
             print 'Added', u
         print g
         gr = StudentsGroup.get_or_create(g[0], g[1].replace(' ', ''))
-        u = Student.get_by_fio(fio[0], fio[1], fio[2])
+        if u is None:
+            u = Student.get_by_fio(fio[0], fio[1], fio[2])
         u.group = gr
         u.save()
         print 'Update group %s -> %s' % (u, gr)

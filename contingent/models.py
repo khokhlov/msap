@@ -100,7 +100,7 @@ class Student(AbstractStaff):
 
     @staticmethod
     def get_by_email(email):
-        return AbstractStaff.has_by_email(Student, email)
+        return AbstractStaff.get_by_email(Student, email)
 
 class Teacher(AbstractStaff):
     @staticmethod
